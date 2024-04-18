@@ -88,7 +88,6 @@ end
 loop do
   break if page * size > max
   json = if opts[:dry] then mock_reps(page, size, licenses_to_filter)
-    
   else
     github.search_repositories(query, per_page: size, page: page)
   end
