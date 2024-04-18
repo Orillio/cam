@@ -74,14 +74,21 @@ query = [
   'NOT',
   'android'
 ].join(' ')
+
+def mock_reps(page, size, licenses_to_filter)
+  return { 
+    items: if page > 100 then [] else Array.new(size) { { 
+      full_name: "foo/#{Random.hex(5)}", 
+      created_at: Time.now, 
+      license: licenses_to_filter.sample(1)[0] } } 
+    end  
+  }
+end
+
 loop do
   break if page * size > max
-  json = if opts[:dry]
-    { items: if page > 100 then [] else Array.new(size) { {
-        full_name: "foo/#{Random.hex(5)}", 
-        created_at: Time.now, 
-        license: licenses_to_filter.sample(1)[0] 
-      } } end }
+  json = if opts[:dry] then mock_reps(page, size, licenses_to_filter)
+    
   else
     github.search_repositories(query, per_page: size, page: page)
   end
