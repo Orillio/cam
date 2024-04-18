@@ -1,0 +1,20 @@
+The following search criteria have been used:
+\begin{enumerate}
+\item At least 100 stars,
+\item At most 1000 stars,
+and
+\item At least 100 Kb size of Git repo.
+\end{enumerate}
+The exact query string for
+ GitHub API\footnote{\url{https://docs.github.com/en/rest}}
+ was the following:
+\begin{ffcode}
+stars:100..1000
+size:>=100
+language:java
+is:public
+mirror:false
+archived:false
+NOT
+android
+\end{ffcode}

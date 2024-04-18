@@ -77,7 +77,8 @@ query = [
 loop do
   break if page * size > max
   json = if opts[:dry]
-    { items: page > 100 ? [] : Array.new(size) { { full_name: "foo/#{Random.hex(5)}", created_at: Time.now, license: licenses_to_filter.sample(1)[0] } } }
+    { items: page > 100 ? [] : Array.new(size) { { full_name: "foo/#{Random.hex(5)}", created_at: Time.now, 
+    license: licenses_to_filter.sample(1)[0] } } }
   else
     github.search_repositories(query, per_page: size, page: page)
   end
