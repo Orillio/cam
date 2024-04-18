@@ -80,11 +80,13 @@ def mock_reps(page, size, licenses_to_filter)
     items: if page > 100
       []
     else
-      Array.new(size) { {
-        full_name: "foo/#{Random.hex(5)}",
-        created_at: Time.now,
-        license: licenses_to_filter.sample(1)[0]
-      } }
+      Array.new(size) {
+        {
+          full_name: "foo/#{Random.hex(5)}",
+          created_at: Time.now,
+          license: licenses_to_filter.sample(1)[0]
+        }
+      }
     end
   }
 end
