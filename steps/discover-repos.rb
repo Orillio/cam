@@ -52,9 +52,9 @@ raise 'Can only retrieve up to 1000 repos' if opts[:total] > max
 
 size = [opts[:page_size], opts[:total]].min
 licenses_to_filter = [
-  {key: 'mit', name: 'MIT License'},
-  {key: 'apache-2.0', name: 'Apache License 2.0'},
-  {key: '0bsd', name: 'BSD Zero Clause License'},
+  { key: 'mit', name: 'MIT License' },
+  { key: 'apache-2.0', name: 'Apache License 2.0' },
+  { key: '0bsd', name: 'BSD Zero Clause License' }
 ]
 
 github = Octokit::Client.new
