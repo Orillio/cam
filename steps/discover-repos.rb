@@ -76,12 +76,16 @@ query = [
 ].join(' ')
 
 def mock_reps(page, size, licenses_to_filter)
-  return { 
-    items: if page > 100 then [] else Array.new(size) { { 
-      full_name: "foo/#{Random.hex(5)}", 
-      created_at: Time.now, 
-      license: licenses_to_filter.sample(1)[0] } } 
-    end  
+  {
+    items: if page > 100
+      []
+    else
+      Array.new(size) { {
+        full_name: "foo/#{Random.hex(5)}",
+        created_at: Time.now,
+        license: licenses_to_filter.sample(1)[0]
+      } }
+    end
   }
 end
 
