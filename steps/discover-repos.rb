@@ -75,18 +75,21 @@ query = [
   'android'
 ].join(' ')
 
+def mock_array(page, size, licenses_to_filter)
+  Array.new(size) do
+    {
+      full_name: "foo/#{Random.hex(5)}",
+      created_at: Time.now,
+      license: licenses_to_filter.sample(1)[0]
+    }
+  end
+end
+
 def mock_reps(page, size, licenses_to_filter)
   {
-    items: if page > 100
-      []
+    items: if page > 100 then []
     else
-      Array.new(size) {
-        {
-          full_name: "foo/#{Random.hex(5)}",
-          created_at: Time.now,
-          license: licenses_to_filter.sample(1)[0]
-        }
-      }
+      mock_array(page, size, licenses_to_filter)
     end
   }
 end
