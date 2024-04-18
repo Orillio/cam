@@ -71,9 +71,7 @@ query = [
   'android'
 ].join(' ')
 loop do
-  if page * size > max
-    break
-  end
+  break if page * size > max
   json = if opts[:dry]
     { items: page > 100 ? [] : Array.new(size) { { full_name: "foo/#{Random.hex(5)}", created_at: Time.now } } }
   else
@@ -95,7 +93,7 @@ loop do
     puts "Found #{i[:full_name].inspect} GitHub repo ##{found.count} \
 (#{i[:forks_count]} forks, #{i[:stargazers_count]} stars) with license: #{i[:license][:name]}"
   end
-  puts "Found #{json[:items].count} repositories in page ##{page}"
+  puts "Found #{found.count} repositories in page ##{page}"
   break if found.count >= opts[:total]
   puts "Let's sleep for #{opts[:pause]} seconds to cool off GitHub API \
 (already found #{found.count} repos, need #{opts[:total]})..."
