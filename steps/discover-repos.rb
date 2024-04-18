@@ -72,7 +72,6 @@ query = [
 ].join(' ')
 loop do
   if page * size > max
-    puts "Can't go to page ##{page}, since it will be over #{max}"
     break
   end
   json = if opts[:dry]
@@ -91,7 +90,8 @@ loop do
       size: i[:size],
       open_issues_count: i[:open_issues_count],
       description: i[:description],
-      topics: i[:topics] }
+      topics: i[:topics]
+    }
     puts "Found #{i[:full_name].inspect} GitHub repo ##{found.count} \
 (#{i[:forks_count]} forks, #{i[:stargazers_count]} stars) with license: #{i[:license][:name]}"
   end
