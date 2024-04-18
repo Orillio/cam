@@ -81,8 +81,7 @@ loop do
     github.search_repositories(query, per_page: size, page: page)
   end
   json[:items].each do |i|
-    license = i[:license]
-    next if license.nil? || !licenses_to_filter.include?(license[:key])
+    next if i[:license].nil? || !licenses_to_filter.include?(i[:license][:key])
     found[i[:full_name]] = {
       full_name: i[:full_name],
       default_branch: i[:default_branch],
@@ -92,10 +91,9 @@ loop do
       size: i[:size],
       open_issues_count: i[:open_issues_count],
       description: i[:description],
-      topics: i[:topics]
-    }
+      topics: i[:topics]}
     puts "Found #{i[:full_name].inspect} GitHub repo ##{found.count} \
-(#{i[:forks_count]} forks, #{i[:stargazers_count]} stars) with license: #{license[:name]}"
+(#{i[:forks_count]} forks, #{i[:stargazers_count]} stars) with license: #{i[:license][:name]}"
   end
   puts "Found #{json[:items].count} repositories in page ##{page}"
   break if found.count >= opts[:total]
