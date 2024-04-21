@@ -94,6 +94,10 @@ def mock_reps(page, size, licenses)
   }
 end
 
+def skip(repo) 
+  puts "Repo #{repo[:full_name]} doesn't contain required license. Skipping"
+end
+
 loop do
   break if page * size > max
   count = 0
@@ -102,7 +106,7 @@ loop do
     github.search_repositories(query, per_page: size, page: page)
   end
   json[:items].each do |i|
-    next if i[:license].nil? || !licenses.include?(i[:license][:key])
+    skip(i); next if i[:license].nil? || !licenses.include?(i[:license][:key])
     count += 1
     found[i[:full_name]] = {
       full_name: i[:full_name],
