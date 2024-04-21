@@ -51,7 +51,7 @@ end
 raise 'Can only retrieve up to 1000 repos' if opts[:total] > max
 
 size = [opts[:page_size], opts[:total]].min
-licenses_to_filter = [
+licenses = [
   'mit',
   'apache-2.0',
   '0bsd'
@@ -75,48 +75,57 @@ query = [
   'android'
 ].join(' ')
 
-def mock_array(size, licenses_to_filter)
+def mock_array(size, licenses)
   Array.new(size) do
     {
       full_name: "foo/#{Random.hex(5)}",
       created_at: Time.now,
-      license: { key: licenses_to_filter.sample(1)[0] }
+      license: { key: licenses.sample(1)[0] }
     }
   end
 end
 
-def mock_reps(page, size, licenses_to_filter)
+def mock_reps(page, size, licenses)
   {
     items: if page > 100 then []
     else
-      mock_array(size, licenses_to_filter)
+      mock_array(size, licenses)
     end
+  }
+end
+
+def repo_object(i)
+  {
+    full_name: i[:full_name],
+    default_branch: i[:default_branch],
+    stars: i[:stargazers_count],
+    forks: i[:forks_count],
+    created_at: i[:created_at].iso8601,
+    size: i[:size],
+    open_issues_count: i[:open_issues_count],
+    description: i[:description],
+    topics: i[:topics]
   }
 end
 
 loop do
   break if page * size > max
-  json = if opts[:dry] then mock_reps(page, size, licenses_to_filter)
+  count = 0
+  json = if opts[:dry] then mock_reps(page, size, licenses)
   else
     github.search_repositories(query, per_page: size, page: page)
   end
   json[:items].each do |i|
-    next if i[:license].nil? || !licenses_to_filter.include?(i[:license][:key])
-    found[i[:full_name]] = {
-      full_name: i[:full_name],
-      default_branch: i[:default_branch],
-      stars: i[:stargazers_count],
-      forks: i[:forks_count],
-      created_at: i[:created_at].iso8601,
-      size: i[:size],
-      open_issues_count: i[:open_issues_count],
-      description: i[:description],
-      topics: i[:topics]
-    }
+    if i[:license].nil? || !licenses.include?(i[:license][:key]) then
+      puts "Repo #{i[:full_name]} doesn't contain required license. Skipping..."
+      next
+    end
+    count += 1
+    found[i[:full_name]] = repo_object(i)
     puts "Found #{i[:full_name].inspect} GitHub repo ##{found.count} \
-(#{i[:forks_count]} forks, #{i[:stargazers_count]} stars) with license: #{i[:license][:name]}"
+(#{i[:forks_count]} forks, #{i[:stargazers_count]} stars) with license: #{i[:license][:key]}"
   end
-  puts "Found #{found.count} repositories in page ##{page}"
+  puts "Found #{count} repositories in page ##{page}"
   break if found.count >= opts[:total]
   puts "Let's sleep for #{opts[:pause]} seconds to cool off GitHub API \
 (already found #{found.count} repos, need #{opts[:total]})..."
