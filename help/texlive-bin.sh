@@ -1,6 +1,7 @@
+#!/usr/bin/env bash
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2022 Yegor Bugayenko
+# Copyright (c) 2021-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +20,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+set -e
+set -o pipefail
 
-.SHELLFLAGS = -e -x -c
-.ONESHELL:
-SHELL=bash
+if tlmgr --version > /dev/null 2>&1; then
+  echo -n "$(dirname "$(which tlmgr)")"
+  exit
+fi
 
-TLROOT=$$(kpsewhich -var-value TEXMFDIST)
-PACKAGES=ffcode to-be-determined href-ul
-REPO=yegor256/cam
+root=/usr/local/texlive
+if [ ! -e "${root}" ]; then
+  echo "The directory with TeXLive does not exist: ${root}"
+  exit 1
+fi
+year=$(find "${root}/" -maxdepth 1 -type d -name '[0-9][0-9][0-9][0-9]' -exec basename {} \;)
+arc=$(find "${root}/${year}/bin/" -type d -maxdepth 1 -name '*-*' -exec basename {} \;)
+bin=${root}/${year}/bin/${arc}
+if [ ! -e "${bin}" ]; then
+  echo "The directory with TeXLive does not exist: ${bin}"
+  exit 1
+fi
+PATH=${bin}:${PATH}
+if ! tlmgr --version >/dev/null 2>&1; then
+  echo "The directory with TeXLive does exist (${bin}), but 'tlmgr' doesn't run, can't understand why :("
+  exit 1
+fi
 
-zip: *.tex
-	rm -rf package
-	mkdir package
-	cd package
-	cp ../paper.tex .
-	cp ../main.bib .
-	for p in $(PACKAGES); do cp $(TLROOT)/tex/latex/$${p}/$${p}.sty .; done
-	version=$$(curl --silent -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$(REPO)/releases/latest | jq -r '.tag_name')
-	echo "Version is: $${version}"
-	gsed -i "s|0\.0\.0|$${version}|g" paper.tex
-	gsed -i "s|REPOSITORY|$(REPO)|g" paper.tex
-	pdflatex -shell-escape -halt-on-error paper.tex > /dev/null
-	biber paper
-	pdflatex -halt-on-error paper.tex > /dev/null
-	pdflatex -halt-on-error paper.tex > /dev/null
-	rm -rf *.aux *.bcf *.blg *.fdb_latexmk *.fls *.log *.run.xml *.out *.exc
-	zip -x paper.pdf -r paper-$${version}.zip *
-	mv paper-$${version}.zip ..
-	cd ..
-
-clean:
-	git clean -dfX
-
+echo -n "${bin}"

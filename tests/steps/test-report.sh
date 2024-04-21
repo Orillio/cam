@@ -25,6 +25,17 @@ set -o pipefail
 
 stdout=$2
 
+if ! tlmgr --version >/dev/null 2>&1; then
+  PATH=$PATH:$("${LOCAL}/help/texlive-bin.sh")
+  export PATH
+fi
+
+{
+    pdflatex -v
+    pdftotext -v
+} > "${stdout}" 2>&1
+echo "👍🏻 Dependencies are available"
+
 {
     date +%s%N > "${TARGET}/start.txt"
     mkdir -p "${TARGET}/temp"
@@ -36,6 +47,9 @@ stdout=$2
     echo "\\item foo" > "${TARGET}/temp/reports/foo.tex"
     "${LOCAL}/steps/report.sh"
     test -e "${TARGET}/report.pdf"
+    pdftotext "${TARGET}/report.pdf" "${TARGET}/report.txt"
+    txt=$(cat "${TARGET}/report.txt")
+    echo "${txt}" | grep "yegor256/cam"
 } > "${stdout}" 2>&1
 echo "👍🏻 A PDF report generated correctly"
 
