@@ -94,7 +94,6 @@ def mock_reps(page, size, licenses)
   }
 end
 
-
 def cooldown(opts, found)
   puts "Let's sleep for #{opts[:pause]} seconds to cool off GitHub API \
 (already found #{found.count} repos, need #{opts[:total]})..."
@@ -111,7 +110,7 @@ loop do
   json[:items].each do |i|
     no_license = i[:license].nil? || !licenses.include?(i[:license][:key])
     puts "Repo #{i[:full_name]} doesn't contain required license. Skipping" if no_license
-    next if no_license 
+    next if no_license
     count += 1
     found[i[:full_name]] = {
       full_name: i[:full_name],
